@@ -1,0 +1,5 @@
+{
+  "name": "Robô Kagi + Fibo (Binance Scanner)",
+  "description": "A prototype trading bot panel for scanning Binance pairs using Kagi charts and Fibonacci targets. It features both manual and automatic trading modes, a live chart with indicators, and a control panel for configuration.",
+  "requestFramePermissions": []
+}

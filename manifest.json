@@ -1,0 +1,21 @@
+{
+  "short_name": "Robô Kagi",
+  "name": "Robô Kagi + Fibo (Binance Scanner)",
+  "description": "A prototype trading bot panel for scanning Binance pairs using Kagi charts and Fibonacci targets.",
+  "icons": [
+    {
+      "src": "/logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#f59e0b",
+  "background_color": "#09090b"
+}
