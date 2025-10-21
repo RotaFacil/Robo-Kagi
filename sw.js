@@ -1,8 +1,17 @@
+
 const CACHE_NAME = 'robokagi-cache-v1';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
 ];
+
+// Define __BACKEND_API_BASE_URL__ as a placeholder that will be replaced by Vite
+// during the build process with the actual backend URL, using the 'define' option in vite.config.ts.
+// This is necessary because service workers cannot directly access `process.env` or `import.meta.env`
+// without explicit build-time injection.
+declare const __BACKEND_API_BASE_URL__: string; // For TypeScript type checking, removed in JS build.
+const BACKEND_API_BASE_URL_FOR_SW = __BACKEND_API_BASE_URL__;
+
 
 // On install, cache the app shell
 self.addEventListener('install', (event) => {
@@ -34,8 +43,8 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Skip API calls and websockets
-    if (event.request.url.includes('://localhost:8000')) {
+    // Skip API calls to the backend URL to ensure fresh data
+    if (event.request.url.startsWith(BACKEND_API_BASE_URL_FOR_SW)) {
         return;
     }
 

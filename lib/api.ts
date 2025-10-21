@@ -1,6 +1,10 @@
+
+
 import type { MarketType } from '../App';
 
-const API_BASE_URL = 'http://localhost:8000';
+// Uses the VITE_BACKEND_URL environment variable, or falls back to localhost for development.
+// This variable should be configured in your build environment (e.g., .env file) for deployment.
+const API_BASE_URL = process.env.VITE_BACKEND_URL || 'http://localhost:8000';
 
 // This will hold the initialized AI client instance.
 // Using `any` because the type is from a dynamically imported module.

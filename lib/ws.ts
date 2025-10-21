@@ -1,3 +1,5 @@
+
+
 export function connectWS(
   onMsg: (data: any) => void,
   onStatusChange: (status: 'connecting' | 'connected' | 'disconnected') => void,
@@ -5,9 +7,17 @@ export function connectWS(
   let reconnectDelay = 1000; // Start with 1 second
   const maxReconnectDelay = 30000; // Cap at 30 seconds
 
+  const getWsUrl = () => {
+    // Uses the VITE_BACKEND_URL environment variable, or falls back to localhost for development.
+    // This variable should be configured in your build environment (e.g., .env file) for deployment.
+    const backendBase = process.env.VITE_BACKEND_URL || 'http://localhost:8000';
+    // Replaces 'http' or 'https' with 'ws' or 'wss' for WebSocket
+    return backendBase.replace(/^http/, 'ws') + '/ws';
+  };
+
   const connect = () => {
     onStatusChange('connecting');
-    const ws = new WebSocket(`ws://localhost:8000/ws`);
+    const ws = new WebSocket(getWsUrl());
     
     ws.onmessage = (ev) => {
       try {
