@@ -21,7 +21,6 @@ interface PositionCardProps {
     position: Position;
 }
 
-// FIX: Explicitly type PositionCard as React.FC<PositionCardProps> to correctly handle the `key` prop provided in the parent's `.map()` function.
 const PositionCard: React.FC<PositionCardProps> = ({ position }) => (
     <div className="bg-zinc-800 rounded p-2 text-xs">
         <div className="flex justify-between font-bold">
@@ -38,9 +37,29 @@ const PositionCard: React.FC<PositionCardProps> = ({ position }) => (
     </div>
 );
 
+const SkeletonLoader = () => (
+    <div className="p-2 animate-pulse">
+        <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="flex flex-col gap-1">
+                <div className="h-4 bg-zinc-700 rounded w-3/4"></div>
+                <div className="h-7 bg-zinc-800 rounded w-1/2"></div>
+            </div>
+            <div className="flex flex-col gap-1">
+                 <div className="h-4 bg-zinc-700 rounded w-3/4"></div>
+                <div className="h-7 bg-zinc-800 rounded w-1/2"></div>
+            </div>
+        </div>
+        <div className="mt-4 space-y-2">
+            <div className="h-16 bg-zinc-800 rounded"></div>
+            <div className="h-16 bg-zinc-800 rounded"></div>
+        </div>
+    </div>
+);
+
+
 export function AccountContent({ accountState, isLoading, error }: AccountPanelProps) {
     if (isLoading) {
-        return <div className="text-center text-zinc-500 p-4">Carregando dados da conta...</div>;
+        return <SkeletonLoader />;
     }
 
     if (error) {

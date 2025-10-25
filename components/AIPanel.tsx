@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { askAI, analyzeChartAI } from '../lib/api';
+import type { GroundingChunk } from '@google/genai';
 
 interface AIPanelProps {
     focusSymbol: string;
@@ -7,7 +8,7 @@ interface AIPanelProps {
 }
 
 type AITab = 'qa' | 'analysis';
-type Message = { role: 'user' | 'model', text: string, citations?: any[] };
+type Message = { role: 'user' | 'model', text: string, citations?: GroundingChunk[] };
 
 const LoadingSpinner = () => (
     <div className="flex justify-center items-center space-x-2">
@@ -109,8 +110,8 @@ export default function AIPanel({ focusSymbol, aiStrategy }: AIPanelProps) {
                                         <div className="mt-2 text-xs border-t border-zinc-600 pt-1">
                                             <p className="font-semibold text-zinc-400">Fontes:</p>
                                             <ul className="list-disc list-inside">
-                                                {msg.citations.map((cit: any, i) => (
-                                                    <li key={i}><a href={cit.web.uri} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">{cit.web.title}</a></li>
+                                                {msg.citations.map((cit: GroundingChunk, i) => (
+                                                    <li key={i}><a href={cit.web?.uri} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">{cit.web?.title || cit.web?.uri}</a></li>
                                                 ))}
                                             </ul>
                                         </div>

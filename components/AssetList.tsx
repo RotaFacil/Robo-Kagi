@@ -111,7 +111,7 @@ export default function AssetList({ symbols, alerts, focusSymbol, setFocusSymbol
     };
 
     return (
-        <div className="bg-zinc-900 rounded-lg p-2 flex flex-col h-[50vh] lg:h-[calc(100vh-60px)]">
+        <div className="bg-zinc-900 rounded-lg p-2 flex flex-col h-full">
             <div className="flex items-center gap-2 mb-2">
                 <button onClick={() => setMarket('futures')} className={`px-3 py-1 text-sm font-bold rounded-md flex-1 transition-colors ${market === 'futures' ? 'bg-amber-500 text-black' : 'bg-zinc-800 hover:bg-zinc-700'}`}>Futuros</button>
                 <button onClick={() => setMarket('spot')} className={`px-3 py-1 text-sm font-bold rounded-md flex-1 transition-colors ${market === 'spot' ? 'bg-amber-500 text-black' : 'bg-zinc-800 hover:bg-zinc-700'}`}>Spot (À Vista)</button>
@@ -124,12 +124,12 @@ export default function AssetList({ symbols, alerts, focusSymbol, setFocusSymbol
                 className="bg-zinc-800 border border-zinc-700 rounded-md px-2 py-1 mb-2 text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-amber-500 w-full transition-all duration-300 focus:w-full"
                 disabled={wsStatus !== 'connected'}
             />
-            <div className="flex items-center border-b border-zinc-700 mb-2 text-sm overflow-x-auto">
+            <div className="flex flex-wrap items-center border-b border-zinc-700 mb-2 text-sm">
                 {CATEGORIES.map(cat => (
                     <button
                         key={cat}
                         onClick={() => setActiveTab(cat)}
-                        className={`px-3 py-1.5 font-semibold transition-colors whitespace-nowrap ${activeTab === cat ? 'text-amber-300 border-b-2 border-amber-300' : 'text-zinc-400 hover:text-zinc-200'}`}
+                        className={`px-3 py-1.5 font-semibold transition-colors ${activeTab === cat ? 'text-amber-300 border-b-2 border-amber-300' : 'text-zinc-400 hover:text-zinc-200'}`}
                     >
                         {cat}{cat === 'Robô IA' && <span className="ml-1.5 bg-cyan-500 text-black text-xs font-bold rounded-full px-1.5 py-0.5">{monitoredSymbols.length}</span>}
                     </button>

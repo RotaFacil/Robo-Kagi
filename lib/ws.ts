@@ -1,64 +1,69 @@
-
-
 export function connectWS(
   onMsg: (data: any) => void,
   onStatusChange: (status: 'connecting' | 'connected' | 'disconnected') => void,
 ) {
-  let reconnectDelay = 1000; // Start with 1 second
-  const maxReconnectDelay = 30000; // Cap at 30 seconds
+  const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+  const wsUrl = `${protocol}//${window.location.host}/ws`;
 
-  const getWsUrl = () => {
-    // Uses the VITE_BACKEND_URL environment variable, or falls back to localhost for development.
-    // This variable should be configured in your build environment (e.g., .env file) for deployment.
-    const backendBase = process.env.VITE_BACKEND_URL || 'http://localhost:8000';
-    // Replaces 'http' or 'https' with 'ws' or 'wss' for WebSocket
-    return backendBase.replace(/^http/, 'ws') + '/ws';
-  };
+  let ws: WebSocket | null = null;
+  let reconnectTimeout: number | null = null;
 
-  const connect = () => {
+  function connect() {
     onStatusChange('connecting');
-    const ws = new WebSocket(getWsUrl());
+    console.log(`Attempting to connect to WebSocket at ${wsUrl}...`);
     
-    ws.onmessage = (ev) => {
-      try {
-        const msg = JSON.parse(ev.data);
-        if (msg.type === 'state') {
-            // Initial state for both bots
-            onMsg({ type: 'kagi_bot_state', data: { running: msg.data.kagi_bot_running, focus: msg.data.focus } });
-            onMsg({ type: 'ai_bot_state', data: { running: msg.data.ai_bot_running } });
-            onMsg({ type: 'ai_monitor_list', data: { symbols: msg.data.ai_monitored_symbols } });
+    ws = new WebSocket(wsUrl);
 
-        } else {
-            onMsg(msg);
-        }
-      } catch (e) {
-        console.error("Failed to parse WebSocket message:", e);
+    ws.onopen = () => {
+      console.log('WebSocket connection established.');
+      onStatusChange('connected');
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+        reconnectTimeout = null;
       }
     };
 
-    ws.onopen = () => {
-      console.log("WebSocket connected");
-      onStatusChange('connected');
-      reconnectDelay = 1000; // Reset delay on successful connection
+    ws.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        onMsg(message);
+      } catch (e) {
+        console.error('Failed to parse WebSocket message:', e);
+      }
     };
 
-    ws.onclose = () => {
-      console.log(`WebSocket disconnected. Reconnecting in ${reconnectDelay / 1000} seconds...`);
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      // The onclose event will handle the reconnection logic.
+    };
+
+    ws.onclose = (event) => {
+      console.log(`WebSocket connection closed. Code: ${event.code}, Reason: ${event.reason}`);
       onStatusChange('disconnected');
-      setTimeout(connect, reconnectDelay);
-      // Increase delay for next attempt
-      reconnectDelay = Math.min(reconnectDelay * 2, maxReconnectDelay);
+      
+      // Don't attempt to reconnect if the close was intentional (e.g., component unmount).
+      // A code of 1000 is a normal closure.
+      if (event.code !== 1000) {
+        if (!reconnectTimeout) {
+          console.log('Attempting to reconnect in 5 seconds...');
+          reconnectTimeout = window.setTimeout(connect, 5000);
+        }
+      }
     };
-
-    ws.onerror = () => {
-      // The 'onerror' event is automatically followed by the 'onclose' event,
-      // which handles the reconnection logic. Logging an error here is redundant
-      // and can be alarming when the backend is intentionally offline during development.
-      // The UI already provides clear feedback on the connection status.
-    };
-
-    return ws;
   }
 
-  return connect();
+  connect();
+
+  // Return a controller object with a close method for cleanup.
+  return {
+    close: () => {
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
+      if (ws) {
+        // Use code 1000 for a normal, intentional closure.
+        ws.close(1000, 'Component unmounting');
+      }
+    },
+  };
 }

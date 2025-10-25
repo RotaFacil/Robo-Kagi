@@ -1,13 +1,12 @@
-
-
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
   define: {
-    // Inject VITE_BACKEND_URL into the global scope for use in service worker
-    // Note: process.env is used here because the existing code uses it.
-    '__BACKEND_API_BASE_URL__': JSON.stringify(process.env.VITE_BACKEND_URL || 'http://localhost:8000'),
+    // This makes the environment variable available in the client-side code.
+    // Vite performs a direct text replacement, so `process.env.API_KEY` in the source
+    // will be replaced with the value of the API_KEY from the build environment.
+    'process.env.API_KEY': JSON.stringify(process.env.API_KEY),
   },
 })

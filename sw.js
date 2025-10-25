@@ -1,16 +1,29 @@
 
+
 const CACHE_NAME = 'robokagi-cache-v1';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
+    '/logo192.png',
+    '/logo512.png',
+    'https://cdn.tailwindcss.com',
+    'https://aistudiocdn.com/react@^18.3.1',
+    'https://aistudiocdn.com/react-dom@^18.3.1/index.js',
+    'https://aistudiocdn.com/react-dom@^18.3.1/client.js',
+    'https://aistudiocdn.com/react@^18.3.1/index.js',
+    'https://aistudiocdn.com/lightweight-charts@^4.2.0',
+    'https://aistudiocdn.com/@google/genai@^0.19.1',
+    'https://aistudiocdn.com/vite@^7.1.11',
+    'https://aistudiocdn.com/@vitejs/plugin-react@^5.0.4',
+    'https://aistudiocdn.com/tailwindcss@^4.1.15'
 ];
 
-// Define __BACKEND_API_BASE_URL__ as a placeholder that will be replaced by Vite
-// during the build process with the actual backend URL, using the 'define' option in vite.config.ts.
-// This is necessary because service workers cannot directly access `process.env` or `import.meta.env`
-// without explicit build-time injection.
-declare const __BACKEND_API_BASE_URL__: string; // For TypeScript type checking, removed in JS build.
-const BACKEND_API_BASE_URL_FOR_SW = __BACKEND_API_BASE_URL__;
+// Define API path prefixes to identify backend requests and prevent them from being cached by the service worker.
+const API_PREFIXES = [
+    '/config', '/start_', '/stop_', '/ai_monitor_list', '/order', '/market_order',
+    '/limit_order', '/symbols', '/ohlcv', '/kagi', '/market_overview', '/account',
+    '/backtest', '/focus'
+];
 
 
 // On install, cache the app shell
@@ -43,8 +56,10 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Skip API calls to the backend URL to ensure fresh data
-    if (event.request.url.startsWith(BACKEND_API_BASE_URL_FOR_SW)) {
+    const url = new URL(event.request.url);
+
+    // Skip API calls to the backend to ensure fresh data
+    if (API_PREFIXES.some(prefix => url.pathname.startsWith(prefix))) {
         return;
     }
 

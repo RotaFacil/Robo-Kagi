@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import type { AccountState, Order, Alert } from '../App';
 import { AccountContent } from './AccountPanel';
 import Orders from './Orders';
-import DashboardStats from './DashboardStats';
 
 interface PositionsPanelProps {
     accountState: AccountState | null;
@@ -13,12 +12,12 @@ interface PositionsPanelProps {
     onClearOrders: () => void;
 }
 
-type Tab = 'Posições' | 'Ordens Abertas' | 'Histórico de Ordens' | 'Estatísticas';
+type Tab = 'Posições' | 'Ordens Abertas' | 'Histórico de Ordens';
 
-export default function PositionsPanel({ accountState, orders, alerts, isLoading, error, onClearOrders }: PositionsPanelProps) {
+export default function PositionsPanel({ accountState, orders, isLoading, error, onClearOrders }: PositionsPanelProps) {
     const [activeTab, setActiveTab] = useState<Tab>('Posições');
 
-    const tabs: Tab[] = ['Posições', 'Estatísticas', 'Histórico de Ordens', 'Ordens Abertas'];
+    const tabs: Tab[] = ['Posições', 'Histórico de Ordens', 'Ordens Abertas'];
 
     return (
         <div className="bg-zinc-900 rounded-lg">
@@ -38,11 +37,6 @@ export default function PositionsPanel({ accountState, orders, alerts, isLoading
             <div className="min-h-[200px]">
                 {activeTab === 'Posições' && (
                     <AccountContent accountState={accountState} isLoading={isLoading} error={error} />
-                )}
-                 {activeTab === 'Estatísticas' && (
-                    <div className="p-2">
-                      <DashboardStats alerts={alerts} orders={orders} />
-                    </div>
                 )}
                 {activeTab === 'Ordens Abertas' && (
                     <div className="text-center text-zinc-500 p-8">Funcionalidade em desenvolvimento.</div>

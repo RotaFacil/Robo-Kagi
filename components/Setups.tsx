@@ -26,7 +26,6 @@ interface SetupCardProps {
     wsStatus: 'connecting' | 'connected' | 'disconnected';
 }
 
-// FIX: Explicitly type SetupCard as React.FC<SetupCardProps> to correctly handle the `key` prop provided in the parent's `.map()` function.
 const SetupCard: React.FC<SetupCardProps> = ({ a, setFocusSymbol, wsStatus }) => {
     const rr = calculateRR(a);
     return (

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { sendMarketOrder } from '../lib/api';
+import { sendMarketOrder, sendLimitOrder } from '../lib/api';
 import type { AccountState } from '../App';
 
 interface TradePanelProps {
     focusSymbol: string;
     wsStatus: 'connecting' | 'connected' | 'disconnected';
     accountState: AccountState | null;
+    addToast: (message: string, type: 'success' | 'error' | 'info') => void;
 }
 
 const SpinnerIcon = () => (
@@ -15,9 +16,10 @@ const SpinnerIcon = () => (
     </svg>
 );
 
-export default function TradePanel({ focusSymbol, wsStatus, accountState }: TradePanelProps) {
-    const [activeTab, setActiveTab] = useState('Mercado');
+export default function TradePanel({ focusSymbol, wsStatus, accountState, addToast }: TradePanelProps) {
+    const [activeTab, setActiveTab] = useState<'Mercado' | 'Limite'>('Mercado');
     const [size, setSize] = useState('');
+    const [limitPrice, setLimitPrice] = useState('');
     const [takeProfit, setTakeProfit] = useState('');
     const [stopLoss, setStopLoss] = useState('');
     const [percentage, setPercentage] = useState(0);
@@ -59,16 +61,27 @@ export default function TradePanel({ focusSymbol, wsStatus, accountState }: Trad
         const slNum = stopLoss ? parseFloat(stopLoss) : undefined;
 
         if (!focusSymbol || isNaN(sizeNum) || sizeNum <= 0) {
-            // TODO: Basic validation feedback needed
+            addToast('Tamanho da ordem inválido.', 'error');
             return;
         }
         setIsLoading(side);
         try {
-            await sendMarketOrder({ symbol: focusSymbol, side, size: sizeNum, tp: tpNum, sl: slNum });
-            // TODO: Add toast notification on success
+            if (activeTab === 'Mercado') {
+                await sendMarketOrder({ symbol: focusSymbol, side, size: sizeNum, tp: tpNum, sl: slNum });
+                addToast(`Ordem a mercado de ${side} para ${focusSymbol} enviada.`, 'success');
+            } else { // Limite
+                const priceNum = parseFloat(limitPrice);
+                if (isNaN(priceNum) || priceNum <= 0) {
+                    addToast('Preço limite inválido.', 'error');
+                    setIsLoading(null);
+                    return;
+                }
+                await sendLimitOrder({ symbol: focusSymbol, side, size: sizeNum, price: priceNum, tp: tpNum, sl: slNum });
+                addToast(`Ordem limite de ${side} para ${focusSymbol} em ${priceNum} enviada.`, 'success');
+            }
         } catch (e) {
-            console.error(`Failed to place ${side} order`, e);
-            // TODO: Add toast notification on error
+            if (e instanceof Error) addToast(e.message, 'error');
+            else addToast('Ocorreu um erro desconhecido.', 'error');
         } finally {
             setIsLoading(null);
         }
@@ -84,8 +97,8 @@ export default function TradePanel({ focusSymbol, wsStatus, accountState }: Trad
                     Mercado
                 </button>
                  <button
-                    className={`px-4 py-2 text-zinc-600 cursor-not-allowed`}
-                    disabled
+                    onClick={() => setActiveTab('Limite')}
+                    className={`px-4 py-2 ${activeTab === 'Limite' ? 'text-amber-300 border-b-2 border-amber-300' : 'text-zinc-400 hover:text-zinc-200'}`}
                 >
                     Limite
                 </button>
@@ -94,6 +107,22 @@ export default function TradePanel({ focusSymbol, wsStatus, accountState }: Trad
                 <div className="text-zinc-400 text-xs">
                     Disponível: <span className="font-mono text-zinc-200">{availableBalance.toFixed(2)} USDT</span>
                 </div>
+
+                {activeTab === 'Limite' && (
+                    <div>
+                        <label htmlFor="limitPrice" className="block text-zinc-400 mb-1 text-xs">Preço Limite</label>
+                        <input
+                            type="number"
+                            id="limitPrice"
+                            value={limitPrice}
+                            onChange={e => setLimitPrice(e.target.value)}
+                            placeholder="Preço da ordem"
+                            className="bg-zinc-800 border border-zinc-700 rounded-md p-2 w-full font-mono disabled:opacity-50 text-sm"
+                            disabled={!isConnected}
+                        />
+                    </div>
+                )}
+
                 <div>
                     <label htmlFor="size" className="block text-zinc-400 mb-1 text-xs">Tamanho</label>
                     <div className="relative">
