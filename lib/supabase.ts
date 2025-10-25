@@ -1,8 +1,10 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { User, MasterApiState, RobotInstance, TradingParameters } from '../App';
 
-// Reverted to the direct Supabase URL as the Vite proxy has been removed.
-const supabaseUrl = 'https://flqfhtnzifmguzttjvgv.supabase.co';
+// Use the current window's origin as the Supabase URL.
+// This ensures that requests are sent to the local Vite dev server,
+// which will then proxy them to the real Supabase backend, avoiding CORS issues.
+const supabaseUrl = window.location.origin;
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZscWZodG56aWZtZ3V6dHRqdmd2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzMzM2ODUsImV4cCI6MjA3MTkwOTY4NX0.kM3e8Lw8Qu0caDxncaJ4gzsJ7ordYqSCNjnwyU0k10Q';
 
 

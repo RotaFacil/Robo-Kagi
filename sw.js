@@ -20,6 +20,12 @@ const ASSETS_TO_CACHE = [
 
 // Define API path prefixes to identify backend requests and prevent them from being cached by the service worker.
 const API_PREFIXES = [
+    // Supabase services
+    '/auth/v1',
+    '/rest/v1',
+    '/storage/v1',
+    '/realtime/v1',
+    // Existing backend API
     '/config', '/start_', '/stop_', '/ai_monitor_list', '/order', '/market_order',
     '/limit_order', '/symbols', '/ohlcv', '/kagi', '/market_overview', '/account',
     '/backtest', '/focus'
